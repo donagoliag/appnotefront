@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradeFlow - Bulletins</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        /* :root {
+            --mirror-bg: rgba(0, 0, 0, 0.25);
+            --mirror-border: rgba(255, 255, 255, 0.12);
+            --mirror-hover: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.6);
+        } */
+
+         :root {
+        --mirror-bg: rgba(0, 0, 0, 0.5); /* plus sombre */
+        --mirror-border: rgba(255, 255, 255, 0.15); /* bordure un peu plus visible */
+        --mirror-hover: rgba(255, 255, 255, 0.08); /* survol un peu plus clair */
+        --text-main: #ffffff;
+        --text-dim: rgba(255, 255, 255, 0.8); /* texte secondaire plus clair */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), 
+                        url('image1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* CLASSE MIROIR UNIFIÉE */
+        .mirror {
+            background: var(--mirror-bg);
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            border: 1px solid var(--mirror-border);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mirror:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            margin: 20px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 45px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            cursor: pointer;
+            color: var(--text-dim);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .nav-item:hover {
+            background: var(--mirror-hover);
+            color: var(--text-main);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .user-section {
+            margin-top: auto;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .user-info h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        /* MAIN CONTENT */
+        .main-wrapper {
+            flex: 1;
+            padding: 40px 40px 40px 0;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 35px;
+        }
+
+        .page-title h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .page-title p {
+            color: var(--text-dim);
+            font-size: 15px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--mirror-bg);
+            border: 1px solid var(--mirror-border);
+            backdrop-filter: blur(5px);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background: white;
+            color: black;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* STATS MINI */
+        .stats-mini {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-mini-card {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .stat-mini-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .stat-mini-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        /* GRID LAYOUT */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        /* CUSTOM DROPDOWN */
+        .custom-dropdown {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .dropdown-trigger {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--mirror-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .dropdown-trigger:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .dropdown-trigger.open {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .dropdown-trigger i.fa-chevron-down {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-trigger.open i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu-custom {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: 1px solid var(--mirror-border);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .dropdown-menu-custom.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-option {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dropdown-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        .dropdown-option.selected {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .dropdown-option i.fa-check {
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .dropdown-option.selected i.fa-check {
+            opacity: 1;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: white;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            flex: 1;
+            color: var(--text-main);
+        }
+
+        /* BULLETIN PREVIEW */
+        .bulletin-preview {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--mirror-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .bulletin-header {
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+        }
+
+        .university-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .institute-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        .bulletin-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
+
+        .bulletin-subtitle {
+            font-size: 13px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .student-identity {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .identity-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .identity-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .identity-label {
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .identity-value {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .ue-section {
+            margin-bottom: 20px;
+        }
+
+        .ue-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .ecue-table {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .ecue-table thead {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .ecue-table th {
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .ecue-table th:nth-child(2),
+        .ecue-table th:nth-child(3) {
+            text-align: center;
+        }
+
+        .ecue-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            color: var(--text-main);
+        }
+
+        .ecue-table td:nth-child(2),
+        .ecue-table td:nth-child(3) {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .ecue-name {
+            font-weight: 600;
+        }
+
+        .ue-moyenne {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 10px 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 13px;
+            margin-top: 8px;
+            color: var(--text-main);
+        }
+
+        .summary-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .summary-mention {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 12px;
+        }
+
+        .appreciation {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .appreciation-title {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
+
+        .appreciation-text {
+            font-size: 12px;
+            line-height: 1.6;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .signature-block {
+            text-align: center;
+        }
+
+        .signature-label {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
+
+        .signature-line {
+            width: 150px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 auto 8px;
+        }
+
+        .signature-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        /* HISTORY TABLE */
+        .history-section {
+            margin-top: 32px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .history-table thead th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--mirror-border);
+        }
+
+        .history-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .history-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .history-table tbody td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .history-table tbody td:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+
+        .history-table tbody td:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-success {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+        }
+
+        .btn-icon {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 6px;
+        }
+
+        .btn-download {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-view {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+        }
+
+        .btn-view:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-delete-icon {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff6b6b;
+        }
+
+        .btn-delete-icon:hover {
+            background: rgba(255, 59, 48, 0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1400px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .stats-mini {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                margin: 20px 20px 0;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .main-wrapper {
+                padding: 20px;
+                height: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: calc(100% - 40px);
+                height: auto;
+                margin: 20px 20px 0;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .main-wrapper {
+                padding: 20px;
+                height: auto;
+            }
+
+            .stats-mini {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+            }
+
+            .bulletin-preview {
+                padding: 24px;
+            }
+
+            .signature-section {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar mirror">
+        <div class="logo-area">
+            <div class="logo-icon">GF</div>
+            <h2 class="logo-text">GradeFlow</h2>
+        </div>
+
+        <nav class="nav-links">
+            <a href="#" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Tableau de bord</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span>Étudiants</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Gestion Notes</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Enseignants</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>ECUEs-UEs</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <i class="fas fa-file-alt"></i>
+                <span>Bulletins</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+        </nav>
+
+        <div class="user-section mirror">
+            <div class="user-avatar">PA</div>
+            <div class="user-info">
+                <h4>Prof. Amoussou</h4>
+                <p>Enseignant</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-wrapper">
+        <header class="header">
+            <div class="page-title">
+                <h1>Bulletins</h1>
+                <p>Génération et gestion des bulletins de notes</p>
+            </div>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-mini">
+            <div class="stat-mini-card mirror">
+                <div class="stat-mini-value">247</div>
+                <div class="stat-mini-label">Bulletins générés</div>
+            </div>
+            <div class="stat-mini-card mirror">
+                <div class="stat-mini-value">45</div>
+                <div class="stat-mini-label">Ce mois-ci</div>
+            </div>
+            <div class="stat-mini-card mirror">
+                <div class="stat-mini-value">12</div>
+                <div class="stat-mini-label">Master 1</div>
+            </div>
+            <div class="stat-mini-card mirror">
+                <div class="stat-mini-value">8</div>
+                <div class="stat-mini-label">Master 2</div>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="grid-2">
+            <!-- GENERATOR -->
+            <div class="mirror" style="padding: 25px;">
+                <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
+                    <i class="fas fa-plus-circle"></i> Générer un Bulletin
+                </h2>
+
+                <div class="form-label">Niveau</div>
+                <div class="custom-dropdown" id="niveauDropdown">
+                    <div class="dropdown-trigger mirror">
+                        <span id="niveauLabel">Master 1</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-menu-custom">
+                        <div class="dropdown-option selected" data-niveau="1">
+                            <span>Master 1</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="dropdown-option" data-niveau="2">
+                            <span>Master 2</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-label">Filière</div>
+                <div class="custom-dropdown" id="filiereDropdown">
+                    <div class="dropdown-trigger mirror">
+                        <span id="filiereLabel">Génie Logiciel (GL)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-menu-custom">
+                        <div class="dropdown-option selected" data-filiere="GL">
+                            <span>Génie Logiciel (GL)</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="dropdown-option" data-filiere="SI">
+                            <span>Systèmes d'Information (SI)</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="dropdown-option" data-filiere="SIRI">
+                            <span>Sécurité Informatique (SIRI)</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-label">Étudiant</div>
+                <div class="custom-dropdown" id="studentDropdown">
+                    <div class="dropdown-trigger mirror">
+                        <span id="studentLabel">Kouadio Ama - IFRI2024M001</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-menu-custom">
+                        <div class="dropdown-option selected" data-student="1">
+                            <span>Kouadio Ama - IFRI2024M001</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="dropdown-option" data-student="2">
+                            <span>Yao Koffi - IFRI2024M002</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="dropdown-option" data-student="3">
+                            <span>Bah Aminata - IFRI2024M003</span>
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-label">Options</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item mirror">
+                        <input type="checkbox" id="optAppreciation" checked>
+                        <label for="optAppreciation">Inclure l'appréciation</label>
+                    </div>
+                    <div class="checkbox-item mirror">
+                        <input type="checkbox" id="optSignature" checked>
+                        <label for="optSignature">Signature du directeur</label>
+                    </div>
+                    <div class="checkbox-item mirror">
+                        <input type="checkbox" id="optRang" checked>
+                        <label for="optRang">Afficher le rang</label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn" style="flex: 1;" onclick="updatePreview()">
+                        <i class="fas fa-eye"></i>
+                        Prévisualiser
+                    </button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        Générer PDF
+                    </button>
+                </div>
+
+                <button class="btn" style="width: 100%; margin-top: 12px;" onclick="generateBulk()">
+                    <i class="fas fa-users"></i>
+                    Générer pour toute la classe
+                </button>
+            </div>
+
+            <!-- PREVIEW -->
+            <div class="bulletin-preview" id="bulletinPreview">
+                <div class="bulletin-header">
+                    <div class="university-name">Université d'Abomey-Calavi</div>
+                    <div class="institute-name">Institut de Formation et de Recherche en Informatique (IFRI)</div>
+                    <h1 class="bulletin-title">Bulletin de Notes</h1>
+                    <p class="bulletin-subtitle">Année Académique 2024-2025</p>
+                </div>
+
+                <div class="student-identity">
+                    <div class="identity-row">
+                        <span class="identity-label">Nom et Prénoms :</span>
+                        <span class="identity-value">Kouadio Ama</span>
+                    </div>
+                    <div class="identity-row">
+                        <span class="identity-label">Matricule :</span>
+                        <span class="identity-value">IFRI2024M001</span>
+                    </div>
+                    <div class="identity-row">
+                        <span class="identity-label">Filière :</span>
+                        <span class="identity-value">Systèmes d'Information (SI)</span>
+                    </div>
+                    <div class="identity-row">
+                        <span class="identity-label">Niveau :</span>
+                        <span class="identity-value">Master 1</span>
+                    </div>
+                </div>
+
+                <!-- UE 1 -->
+                <div class="ue-section">
+                    <div class="ue-header">UE1 - Fondamentaux de l'Informatique</div>
+                    <table class="ecue-table">
+                        <thead>
+                            <tr>
+                                <th>ECUE</th>
+                                <th>Note /20</th>
+                                <th>Coef.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ecue-name">Algorithmique Avancée</td>
+                                <td>16.5</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td class="ecue-name">Structures de Données</td>
+                                <td>17.0</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td class="ecue-name">Programmation Orientée Objet</td>
+                                <td>15.5</td>
+                                <td>2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="ue-moyenne">
+                        <span>Moyenne UE1</span>
+                        <span>16.50 / 20</span>
+                    </div>
+                </div>
+
+                <!-- UE 2 -->
+                <div class="ue-section">
+                    <div class="ue-header">UE2 - Systèmes et Réseaux</div>
+                    <table class="ecue-table">
+                        <thead>
+                            <tr>
+                                <th>ECUE</th>
+                                <th>Note /20</th>
+                                <th>Coef.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ecue-name">Administration Systèmes Linux</td>
+                                <td>18.0</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td class="ecue-name">Réseaux Informatiques</td>
+                                <td>17.5</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td class="ecue-name">Sécurité des Réseaux</td>
+                                <td>16.0</td>
+                                <td>2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="ue-moyenne">
+                        <span>Moyenne UE2</span>
+                        <span>17.31 / 20</span>
+                    </div>
+                </div>
+
+                <!-- UE 3 -->
+                <div class="ue-section">
+                    <div class="ue-header">UE3 - Bases de Données et Web</div>
+                    <table class="ecue-table">
+                        <thead>
+                            <tr>
+                                <th>ECUE</th>
+                                <th>Note /20</th>
+                                <th>Coef.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ecue-name">Base de Données Avancées</td>
+                                <td>18.5</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td class="ecue-name">Développement Web</td>
+                                <td>17.0</td>
+                                <td>3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="ue-moyenne">
+                        <span>Moyenne UE3</span>
+                        <span>17.86 / 20</span>
+                    </div>
+                </div>
+
+                <!-- SUMMARY -->
+                <div class="summary-box">
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-label">Moyenne Générale</div>
+                            <div class="summary-value">17.22</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Rang</div>
+                            <div class="summary-value">2<sup>ème</sup> / 45</div>
+                        </div>
+                    </div>
+                    <div class="summary-mention">Mention : TRÈS BIEN</div>
+                </div>
+
+                <!-- APPRECIATION -->
+                <div class="appreciation" id="appreciationSection">
+                    <div class="appreciation-title">Appréciation</div>
+                    <div class="appreciation-text">
+                        Excellents résultats. L'étudiante fait preuve d'une grande rigueur et d'un sérieux remarquable dans son travail. Les acquis sont solides et bien maîtrisés. Continuez sur cette lancée.
+                    </div>
+                </div>
+
+                <!-- SIGNATURES -->
+                <div class="signature-section" id="signatureSection">
+                    <div class="signature-block">
+                        <div class="signature-label">Le Directeur des Études</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">Prof. HOUNKONNOU Marc</div>
+                    </div>
+                    <div class="signature-block">
+                        <div class="signature-label">Le Directeur de l'IFRI</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">Prof. GLELE KAKAI Romain</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="history-section">
+            <div class="mirror" style="padding: 25px;">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i> Historique des Bulletins
+                </h2>
+                
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Étudiant</th>
+                            <th>Niveau</th>
+                            <th>Filière</th>
+                            <th>Moyenne</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>17/01/2026</td>
+                            <td>Kouadio Ama</td>
+                            <td>Master 1</td>
+                            <td>SI</td>
+                            <td><strong>17.22</strong></td>
+                            <td><span class="status-badge status-success">Généré</span></td>
+                            <td>
+                                <button class="btn-icon btn-view"><i class="fas fa-eye"></i></button>
+                                <button class="btn-icon btn-download"><i class="fas fa-download"></i></button>
+                                <button class="btn-icon btn-delete-icon"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>17/01/2026</td>
+                            <td>Yao Koffi</td>
+                            <td>Master 1</td>
+                            <td>GL</td>
+                            <td><strong>16.20</strong></td>
+                            <td><span class="status-badge status-success">Généré</span></td>
+                            <td>
+                                <button class="btn-icon btn-view"><i class="fas fa-eye"></i></button>
+                                <button class="btn-icon btn-download"><i class="fas fa-download"></i></button>
+                                <button class="btn-icon btn-delete-icon"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>16/01/2026</td>
+                            <td>Bah Aminata</td>
+                            <td>Master 1</td>
+                            <td>SIRI</td>
+                            <td><strong>15.90</strong></td>
+                            <td><span class="status-badge status-success">Généré</span></td>
+                            <td>
+                                <button class="btn-icon btn-view"><i class="fas fa-eye"></i></button>
+                                <button class="btn-icon btn-download"><i class="fas fa-download"></i></button>
+                                <button class="btn-icon btn-delete-icon"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>15/01/2026</td>
+                            <td>Soro Oumar</td>
+                            <td>Master 1</td>
+                            <td>SI</td>
+                            <td><strong>14.30</strong></td>
+                            <td><span class="status-badge status-success">Généré</span></td>
+                            <td>
+                                <button class="btn-icon btn-view"><i class="fas fa-eye"></i></button>
+                                <button class="btn-icon btn-download"><i class="fas fa-download"></i></button>
+                                <button class="btn-icon btn-delete-icon"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        let currentNiveau = 1;
+        let currentFiliere = 'GL';
+
+        // Dropdown functionality
+        class CustomDropdown {
+            constructor(dropdownId) {
+                this.dropdown = document.getElementById(dropdownId);
+                this.trigger = this.dropdown.querySelector('.dropdown-trigger');
+                this.menu = this.dropdown.querySelector('.dropdown-menu-custom');
+                this.options = this.dropdown.querySelectorAll('.dropdown-option');
+                
+                this.init();
+            }
+
+            init() {
+                this.trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!this.dropdown.contains(e.target)) {
+                        this.close();
+                    }
+                });
+
+                this.options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        this.selectOption(option);
+                    });
+                });
+            }
+
+            toggle() {
+                const isOpen = this.menu.classList.contains('show');
+                
+                document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+                document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+                    trigger.classList.remove('open');
+                });
+
+                if (!isOpen) {
+                    this.open();
+                } else {
+                    this.close();
+                }
+            }
+
+            open() {
+                this.menu.classList.add('show');
+                this.trigger.classList.add('open');
+            }
+
+            close() {
+                this.menu.classList.remove('show');
+                this.trigger.classList.remove('open');
+            }
+
+            selectOption(option) {
+                this.options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                this.close();
+            }
+        }
+
+        // Initialize dropdowns
+        const niveauDropdown = new CustomDropdown('niveauDropdown');
+        const filiereDropdown = new CustomDropdown('filiereDropdown');
+        const studentDropdown = new CustomDropdown('studentDropdown');
+
+        // Niveau change handler
+        document.querySelectorAll('#niveauDropdown .dropdown-option').forEach(option => {
+            option.addEventListener('click', function() {
+                currentNiveau = parseInt(this.dataset.niveau);
+                document.getElementById('niveauLabel').textContent = `Master ${currentNiveau}`;
+            });
+        });
+
+        // Filiere change handler
+        document.querySelectorAll('#filiereDropdown .dropdown-option').forEach(option => {
+            option.addEventListener('click', function() {
+                currentFiliere = this.dataset.filiere;
+                document.getElementById('filiereLabel').textContent = this.querySelector('span').textContent;
+            });
+        });
+
+        // Checkbox handlers
+        document.getElementById('optAppreciation').addEventListener('change', function() {
+            document.getElementById('appreciationSection').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('optSignature').addEventListener('change', function() {
+            document.getElementById('signatureSection').style.display = this.checked ? 'grid' : 'none';
+        });
+
+        // Update preview
+        function updatePreview() {
+            // Refresh preview with current selections
+            console.log('Prévisualisation mise à jour');
+        }
+
+        // Generate PDF
+        function generatePDF() {
+            alert('Génération du PDF en cours...\n\nCette fonctionnalité nécessite une implémentation backend pour créer le fichier PDF.');
+        }
+
+        // Generate bulk
+        function generateBulk() {
+            const confirmed = confirm(`Voulez-vous générer les bulletins pour tous les étudiants de Master ${currentNiveau} - ${currentFiliere} ?`);
+            if (confirmed) {
+                alert('Génération en masse en cours...\n\nCette fonctionnalité nécessite une implémentation backend.');
+            }
+        }
+
+        // jQuery interactions
+        $(document).ready(function() {
+            // Nav items
+            $('.nav-item').on('click', function() {
+                $('.nav-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        });
+    </script>
+</body>
+</html>
