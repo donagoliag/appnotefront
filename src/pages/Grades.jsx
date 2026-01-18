@@ -1,238 +1,168 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import FiltersBar from '../components/grades/FiltersBar';
 import StudentRow from '../components/grades/StudentRow';
-
-const studentsData = [
-  {
-    name: 'Kouadio Ama',
-    matricule: 'IFRI2024M001',
-    master: 1,
-    filiere: 'SI',
-    semesters: {
-      1: { percentage: 89, moyenne: 17.8, ues: [
-        { name: 'UE1: Programmation Avancée', ecues: [
-          { name: 'POO Java', note: 18.5 },
-          { name: 'C++', note: 17.0 }
-        ]},
-        { name: 'UE2: Base de Données', ecues: [
-          { name: 'SQL', note: 19.0 },
-          { name: 'NoSQL', note: 16.5 }
-        ]},
-        { name: 'UE3: Réseaux', ecues: [
-          { name: 'TCP/IP', note: 18.0 },
-          { name: 'Sécurité', note: 17.5 }
-        ]}
-      ]},
-      2: { percentage: 83, moyenne: 16.5, ues: [
-        { name: 'UE1: Développement Web', ecues: [
-          { name: 'HTML/CSS', note: 17.0 },
-          { name: 'JavaScript', note: 16.0 }
-        ]},
-        { name: 'UE2: Architecture', ecues: [
-          { name: 'MVC', note: 16.5 },
-          { name: 'Microservices', note: 16.0 }
-        ]},
-        { name: 'UE3: Cloud', ecues: [
-          { name: 'AWS', note: 17.0 },
-          { name: 'Docker', note: 16.5 }
-        ]}
-      ]}
-    }
-  },
-  {
-    name: 'Yao Koffi',
-    matricule: 'IFRI2024M002',
-    master: 1,
-    filiere: 'GL',
-    semesters: {
-      1: { percentage: 81, moyenne: 16.2, ues: [
-        { name: 'UE1: Programmation Avancée', ecues: [
-          { name: 'POO Java', note: 16.5 },
-          { name: 'C++', note: 15.5 }
-        ]},
-        { name: 'UE2: Base de Données', ecues: [
-          { name: 'SQL', note: 17.0 },
-          { name: 'NoSQL', note: 15.0 }
-        ]},
-        { name: 'UE3: Réseaux', ecues: [
-          { name: 'TCP/IP', note: 16.5 },
-          { name: 'Sécurité', note: 16.0 }
-        ]}
-      ]},
-      2: { percentage: 79, moyenne: 15.8, ues: [
-        { name: 'UE1: Développement Web', ecues: [
-          { name: 'HTML/CSS', note: 16.0 },
-          { name: 'JavaScript', note: 15.5 }
-        ]},
-        { name: 'UE2: Architecture', ecues: [
-          { name: 'MVC', note: 15.5 },
-          { name: 'Microservices', note: 16.0 }
-        ]},
-        { name: 'UE3: Cloud', ecues: [
-          { name: 'AWS', note: 15.5 },
-          { name: 'Docker', note: 16.0 }
-        ]}
-      ]}
-    }
-  },
-  {
-    name: 'Bah Aminata',
-    matricule: 'IFRI2024M003',
-    master: 1,
-    filiere: 'SIRI',
-    semesters: {
-      1: { percentage: 80, moyenne: 15.9, ues: [
-        { name: 'UE1: Programmation Avancée', ecues: [
-          { name: 'POO Java', note: 16.0 },
-          { name: 'C++', note: 15.5 }
-        ]},
-        { name: 'UE2: Base de Données', ecues: [
-          { name: 'SQL', note: 16.5 },
-          { name: 'NoSQL', note: 15.0 }
-        ]},
-        { name: 'UE3: Réseaux', ecues: [
-          { name: 'TCP/IP', note: 16.0 },
-          { name: 'Sécurité', note: 15.5 }
-        ]}
-      ]},
-      2: { percentage: 84, moyenne: 16.8, ues: [
-        { name: 'UE1: Développement Web', ecues: [
-          { name: 'HTML/CSS', note: 17.0 },
-          { name: 'JavaScript', note: 16.5 }
-        ]},
-        { name: 'UE2: Architecture', ecues: [
-          { name: 'MVC', note: 16.5 },
-          { name: 'Microservices', note: 17.0 }
-        ]},
-        { name: 'UE3: Cloud', ecues: [
-          { name: 'AWS', note: 17.0 },
-          { name: 'Docker', note: 16.5 }
-        ]}
-      ]}
-    }
-  },
-  {
-    name: 'Traoré Fatoumata',
-    matricule: 'IFRI2024M005',
-    master: 1,
-    filiere: 'GL',
-    semesters: {
-      1: { percentage: 76, moyenne: 15.2, ues: [
-        { name: 'UE1: Programmation Avancée', ecues: [
-          { name: 'POO Java', note: 15.5 },
-          { name: 'C++', note: 14.5 }
-        ]},
-        { name: 'UE2: Base de Données', ecues: [
-          { name: 'SQL', note: 16.0 },
-          { name: 'NoSQL', note: 14.0 }
-        ]},
-        { name: 'UE3: Réseaux', ecues: [
-          { name: 'TCP/IP', note: 15.5 },
-          { name: 'Sécurité', note: 15.0 }
-        ]}
-      ]},
-      2: { percentage: 73, moyenne: 14.6, ues: [
-        { name: 'UE1: Développement Web', ecues: [
-          { name: 'HTML/CSS', note: 15.0 },
-          { name: 'JavaScript', note: 14.0 }
-        ]},
-        { name: 'UE2: Architecture', ecues: [
-          { name: 'MVC', note: 14.5 },
-          { name: 'Microservices', note: 15.0 }
-        ]},
-        { name: 'UE3: Cloud', ecues: [
-          { name: 'AWS', note: 14.5 },
-          { name: 'Docker', note: 15.0 }
-        ]}
-      ]}
-    }
-  },
-  {
-    name: 'Diallo Mamadou',
-    matricule: 'IFRI2024M006',
-    master: 1,
-    filiere: 'GL',
-    semesters: {
-      1: { percentage: 71, moyenne: 14.1, ues: [
-        { name: 'UE1: Programmation Avancée', ecues: [
-          { name: 'POO Java', note: 14.5 },
-          { name: 'C++', note: 13.5 }
-        ]},
-        { name: 'UE2: Base de Données', ecues: [
-          { name: 'SQL', note: 15.0 },
-          { name: 'NoSQL', note: 13.0 }
-        ]},
-        { name: 'UE3: Réseaux', ecues: [
-          { name: 'TCP/IP', note: 14.0 },
-          { name: 'Sécurité', note: 14.5 }
-        ]}
-      ]},
-      2: { percentage: 68, moyenne: 13.6, ues: [
-        { name: 'UE1: Développement Web', ecues: [
-          { name: 'HTML/CSS', note: 14.0 },
-          { name: 'JavaScript', note: 13.0 }
-        ]},
-        { name: 'UE2: Architecture', ecues: [
-          { name: 'MVC', note: 13.5 },
-          { name: 'Microservices', note: 14.0 }
-        ]},
-        { name: 'UE3: Cloud', ecues: [
-          { name: 'AWS', note: 13.5 },
-          { name: 'Docker', note: 14.0 }
-        ]}
-      ]}
-    }
-  },
-  {
-    name: 'Sanogo Ibrahim',
-    matricule: 'IFRI2024M007',
-    master: 1,
-    filiere: 'GL',
-    semesters: {
-      1: { percentage: 45, moyenne: 9.0, ues: [
-        { name: 'UE1: Programmation Avancée', ecues: [
-          { name: 'POO Java', note: 9.5 },
-          { name: 'C++', note: 8.5 }
-        ]},
-        { name: 'UE2: Base de Données', ecues: [
-          { name: 'SQL', note: 10.0 },
-          { name: 'NoSQL', note: 8.0 }
-        ]},
-        { name: 'UE3: Réseaux', ecues: [
-          { name: 'TCP/IP', note: 9.0 },
-          { name: 'Sécurité', note: 9.0 }
-        ]}
-      ]},
-      2: { percentage: 42, moyenne: 8.4, ues: [
-        { name: 'UE1: Développement Web', ecues: [
-          { name: 'HTML/CSS', note: 9.0 },
-          { name: 'JavaScript', note: 8.0 }
-        ]},
-        { name: 'UE2: Architecture', ecues: [
-          { name: 'MVC', note: 8.5 },
-          { name: 'Microservices', note: 8.0 }
-        ]},
-        { name: 'UE3: Cloud', ecues: [
-          { name: 'AWS', note: 8.5 },
-          { name: 'Docker', note: 8.5 }
-        ]}
-      ]}
-    }
-  }
-];
+import { studentApi, noteApi, structureApi, teacherApi, resultApi } from '../services/api';
 
 const Grades = () => {
+  const [studentsData, setStudentsData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentMaster, setCurrentMaster] = useState(1);
-  const [currentFiliere, setCurrentFiliere] = useState('GL');
+  const [currentFiliere, setCurrentFiliere] = useState('M-INFO');
   const [currentSemestre, setCurrentSemestre] = useState('1');
   const [currentSort, setCurrentSort] = useState('alpha');
   const [searchQuery, setSearchQuery] = useState('');
+  const [filieres, setFilieres] = useState([]);
+  const [niveaux, setNiveaux] = useState([]);
+  const [activeAnnee, setActiveAnnee] = useState(null);
+  const [showAddNoteForm, setShowAddNoteForm] = useState(false);
+  const [newNote, setNewNote] = useState({
+    etudiantUri: '',
+    ecueUri: '',
+    enseignantUri: '',
+    valeurNote: 10,
+    typeEvaluation: 'Examen',
+    session: 'normale'
+  });
+  const [teachers, setTeachers] = useState([]);
+  const [allEcues, setAllEcues] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [studentsRes, filieresRes, niveauxRes, anneesRes, teachersRes, ecuesRes] = await Promise.all([
+          studentApi.getAll(),
+          structureApi.getFilieres(),
+          structureApi.getNiveaux(),
+          structureApi.getAnnees(),
+          teacherApi.getAll(),
+          structureApi.getAllEcues()
+        ]);
+
+        if (filieresRes.data.success) setFilieres(filieresRes.data.data);
+        if (niveauxRes.data.success) setNiveaux(niveauxRes.data.data);
+        if (teachersRes.data.success) setTeachers(teachersRes.data.data);
+        if (ecuesRes.data.success) setAllEcues(ecuesRes.data.data);
+        if (anneesRes.data.success) {
+          setActiveAnnee(anneesRes.data.data.find(a => a.estActive) || anneesRes.data.data[0]);
+        }
+
+        console.log('Filieres data:', filieresRes.data.data);
+        console.log('Niveaux data:', niveauxRes.data.data);
+
+        if (studentsRes.data.success) {
+          const students = studentsRes.data.data.map(s => ({
+            ...s,
+            name: `${s.nom} ${s.prenom}`,
+            master: s.niveauUri?.includes('M1') ? 1 : 2,
+            filiere: s.filiereUri?.split('/').pop() || 'GL',
+            semesters: {
+              1: { percentage: 0, moyenne: 0, ues: [] },
+              2: { percentage: 0, moyenne: 0, ues: [] }
+            }
+          }));
+
+          const studentsWithGrades = await Promise.all(students.map(async (student) => {
+            try {
+              // Find matching filiere and niveau URIs
+              const filiere = filieresRes.data.data.find(f =>
+                f.code === currentFiliere ||
+                f.uri.endsWith(`/${currentFiliere}`) ||
+                f.uri.endsWith(`#${currentFiliere}`) ||
+                f.uri.includes(`/${currentFiliere}_`)
+              );
+              const niveau = niveauxRes.data.data.find(n => n.ordre === currentMaster || n.code?.includes(`M${currentMaster}`));
+
+              console.log(`Matching for student ${student.name}:`, { currentFiliere, currentMaster, filiereFound: !!filiere, niveauFound: !!niveau });
+
+              if (filiere && niveau) {
+                const gradesRes = await noteApi.getGrades(student.uri, filiere.uri, niveau.uri);
+                if (gradesRes.data.success) {
+                  return {
+                    ...student,
+                    semesters: gradesRes.data.data
+                  };
+                }
+              }
+              return student;
+            } catch (err) {
+              console.error(`Error fetching grades for ${student.name}:`, err);
+              return student;
+            }
+          }));
+
+          setStudentsData(studentsWithGrades);
+        }
+      } catch (error) {
+        console.error('Error fetching grades data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentMaster, currentFiliere]);
+
+  const handleConsult = async (student) => {
+    try {
+      const filiere = filieres.find(f => f.code === currentFiliere || f.uri.endsWith(currentFiliere));
+      const niveau = niveaux.find(n => n.ordre === currentMaster);
+
+      if (!filiere || !niveau || !activeAnnee) {
+        alert('Informations de structure manquantes');
+        return;
+      }
+
+      const res = await resultApi.calculate({
+        etudiantUri: student.uri,
+        filiereUri: filiere.uri,
+        niveauUri: niveau.uri,
+        anneeUri: activeAnnee.uri
+      });
+
+      if (res.data.success) {
+        alert(`Bulletin généré pour ${student.name}. Moyenne: ${res.data.data.moyenne}`);
+        // Here you could open a PDF or a detailed view
+      }
+    } catch (error) {
+      alert(`Erreur lors de la génération du bulletin: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
+  const handleEdit = (student) => {
+    alert(`Modification des notes pour ${student.name} (Fonctionnalité en cours d'implémentation)`);
+  };
+
+  const handleDelete = (student) => {
+    alert(`Suppression des notes pour ${student.name} (Fonctionnalité en cours d'implémentation)`);
+  };
+
+  const handleSubmitNote = async (e) => {
+    e.preventDefault();
+    try {
+      await noteApi.create(newNote);
+      alert('Note ajoutée avec succès');
+      setShowAddNoteForm(false);
+      setNewNote({
+        etudiantUri: '',
+        ecueUri: '',
+        enseignantUri: '',
+        valeurNote: 10,
+        typeEvaluation: 'Examen',
+        session: 'normale'
+      });
+      // Refresh data
+      window.location.reload();
+    } catch (error) {
+      alert(`Erreur lors de l'ajout de la note: ${error.response?.data?.message || error.message}`);
+    }
+  };
 
   const filteredAndSortedStudents = useMemo(() => {
     let filtered = studentsData.filter(student => {
       const matchMaster = student.master === currentMaster;
       const matchFiliere = student.filiere === currentFiliere;
-      const matchSearch = searchQuery === '' || 
+      const matchSearch = searchQuery === '' ||
         student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         student.matricule.toLowerCase().includes(searchQuery.toLowerCase());
       return matchMaster && matchFiliere && matchSearch;
@@ -253,7 +183,7 @@ const Grades = () => {
     });
 
     return filtered;
-  }, [currentMaster, currentFiliere, currentSemestre, currentSort, searchQuery]);
+  }, [currentMaster, currentFiliere, currentSemestre, currentSort, searchQuery, studentsData]);
 
   const getInitials = (name) => {
     return name.split(' ').map(n => n[0]).join('');
@@ -301,11 +231,11 @@ const Grades = () => {
 
     const sampleStudent = filteredAndSortedStudents[0];
     if (!sampleStudent) return null;
-    
+
     const ues = sampleStudent.semesters[currentSemestre].ues;
 
     return ues.map((ue, index) => (
-      <th 
+      <th
         key={index}
         className="bg-white/8 text-center font-bold text-white text-xs px-4 py-4 border-b-2 border-white/15"
         colSpan={ue.ecues.length}
@@ -343,12 +273,12 @@ const Grades = () => {
 
     const sampleStudent = filteredAndSortedStudents[0];
     if (!sampleStudent) return null;
-    
+
     const ues = sampleStudent.semesters[currentSemestre].ues;
 
-    return ues.map((ue) => 
+    return ues.map((ue) =>
       ue.ecues.map((ecue, idx) => (
-        <th 
+        <th
           key={`${ue.name}-${idx}`}
           className="bg-white/5 px-4 py-4 text-left text-[10px] font-bold text-white/80 uppercase tracking-wider border-b-2 border-white/15 whitespace-nowrap"
         >
@@ -359,13 +289,13 @@ const Grades = () => {
   };
 
   return (
-    <div className="flex-1 p-10 overflow-y-auto h-screen bg-gradient-to-br from-black/20 to-black/20" 
-         style={{ 
-           backgroundImage: 'linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url("/api/placeholder/1920/1080")',
-           backgroundSize: 'cover',
-           backgroundPosition: 'center',
-           backgroundAttachment: 'fixed'
-         }}>
+    <div className="flex-1 p-10 overflow-y-auto h-screen bg-gradient-to-br from-black/20 to-black/20"
+      style={{
+        backgroundImage: 'linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url("/api/placeholder/1920/1080")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
       {/* Header */}
       <header className="flex justify-between items-start mb-9">
         <div>
@@ -381,12 +311,108 @@ const Grades = () => {
             <i className="fas fa-download"></i>
             Exporter
           </button>
-          <button className="bg-white text-black px-5 py-3 rounded-xl font-semibold text-sm flex items-center gap-2.5 hover:bg-white/90 transition-all">
-            <i className="fas fa-plus"></i>
-            Saisir Notes
+          <button
+            onClick={() => setShowAddNoteForm(!showAddNoteForm)}
+            className="bg-white text-black px-5 py-3 rounded-xl font-semibold text-sm flex items-center gap-2.5 hover:bg-white/90 transition-all"
+          >
+            <i className={`fas fa-${showAddNoteForm ? 'times' : 'plus'}`}></i>
+            {showAddNoteForm ? 'Annuler' : 'Saisir Notes'}
           </button>
         </div>
       </header>
+
+      {showAddNoteForm && (
+        <div className="mb-8 bg-black/50 backdrop-blur-md border border-white/15 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+          <h2 className="text-xl font-bold text-white mb-4">Saisir une nouvelle note</h2>
+          <form onSubmit={handleSubmitNote} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Étudiant</label>
+              <select
+                value={newNote.etudiantUri}
+                onChange={(e) => setNewNote({ ...newNote, etudiantUri: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="" className="bg-gray-900">Sélectionner un étudiant</option>
+                {studentsData.map(s => (
+                  <option key={s.uri} value={s.uri} className="bg-gray-900">{s.name} ({s.matricule})</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">ECUE</label>
+              <select
+                value={newNote.ecueUri}
+                onChange={(e) => setNewNote({ ...newNote, ecueUri: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="" className="bg-gray-900">Sélectionner un ECUE</option>
+                {allEcues.map(e => (
+                  <option key={e.uri} value={e.uri} className="bg-gray-900">{e.codeECUE} - {e.libelleECUE}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Enseignant</label>
+              <select
+                value={newNote.enseignantUri}
+                onChange={(e) => setNewNote({ ...newNote, enseignantUri: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="" className="bg-gray-900">Sélectionner un enseignant</option>
+                {teachers.map(t => (
+                  <option key={t.uri} value={t.uri} className="bg-gray-900">{t.nom} {t.prenom}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Valeur Note</label>
+              <input
+                type="number"
+                step="0.25"
+                min="0"
+                max="20"
+                value={newNote.valeurNote}
+                onChange={(e) => setNewNote({ ...newNote, valeurNote: parseFloat(e.target.value) })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Type Évaluation</label>
+              <select
+                value={newNote.typeEvaluation}
+                onChange={(e) => setNewNote({ ...newNote, typeEvaluation: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="Examen" className="bg-gray-900">Examen</option>
+                <option value="Contrôle Continu" className="bg-gray-900">Contrôle Continu</option>
+                <option value="TP" className="bg-gray-900">TP</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Session</label>
+              <select
+                value={newNote.session}
+                onChange={(e) => setNewNote({ ...newNote, session: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="normale" className="bg-gray-900">Normale</option>
+                <option value="rattrapage" className="bg-gray-900">Rattrapage</option>
+              </select>
+            </div>
+            <div className="lg:col-span-3 flex justify-end">
+              <button type="submit" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-all">
+                Enregistrer la Note
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Filters */}
       <FiltersBar
@@ -399,6 +425,7 @@ const Grades = () => {
         currentSort={currentSort}
         onSortChange={setCurrentSort}
         onSearch={setSearchQuery}
+        filieres={filieres}
       />
 
       {/* Table */}
@@ -438,7 +465,13 @@ const Grades = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAndSortedStudents.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={20} className="text-center py-10 text-white/80">
+                    Chargement des données...
+                  </td>
+                </tr>
+              ) : filteredAndSortedStudents.length === 0 ? (
                 <tr>
                   <td colSpan={20} className="text-center py-10 text-white/80">
                     Aucun étudiant trouvé
@@ -455,6 +488,9 @@ const Grades = () => {
                     getPercentageClass={getPercentageClass}
                     getGradeClass={getGradeClass}
                     getAlertIcon={getAlertIcon}
+                    onConsult={handleConsult}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
                   />
                 ))
               )}

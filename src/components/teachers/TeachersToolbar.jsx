@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, Check, Plus, ArrowUpDown } from 'lucide-react';
 
-const TeachersToolbar = ({ sortOrder, onSortChange, onSearch }) => {
+const TeachersToolbar = ({ sortOrder, onSortChange, onSearch, onAddClick, showForm }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const sortOptions = [
@@ -45,11 +45,10 @@ const TeachersToolbar = ({ sortOrder, onSortChange, onSearch }) => {
                   onSortChange(option.value);
                   setDropdownOpen(false);
                 }}
-                className={`p-3 rounded-lg cursor-pointer flex items-center justify-between transition-all ${
-                  sortOrder === option.value
+                className={`p-3 rounded-lg cursor-pointer flex items-center justify-between transition-all ${sortOrder === option.value
                     ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
-                }`}
+                  }`}
               >
                 <span className="text-sm font-semibold">{option.label}</span>
                 {sortOrder === option.value && <Check size={12} />}
@@ -60,9 +59,12 @@ const TeachersToolbar = ({ sortOrder, onSortChange, onSearch }) => {
       </div>
 
       {/* Add Button */}
-      <button className="px-6 py-3 rounded-xl bg-white text-black hover:bg-white/90 transition-all flex items-center gap-2 font-semibold text-sm">
-        <Plus size={16} />
-        Nouvel Enseignant
+      <button
+        onClick={onAddClick}
+        className={`px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-semibold text-sm ${showForm ? 'bg-red-500 text-white' : 'bg-white text-black hover:bg-white/90'}`}
+      >
+        {showForm ? <i className="fas fa-times" /> : <Plus size={16} />}
+        {showForm ? 'Annuler' : 'Nouvel Enseignant'}
       </button>
     </div>
   );

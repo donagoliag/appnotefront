@@ -23,10 +23,10 @@ ChartJS.register(
   ArcElement
 );
 
-export const LineChartComponent = () => {
+export const LineChartComponent = ({ labels, datasets }) => {
   const data = {
-    labels: ['Semaine 1', 'Semaine 2', 'Semaine 3', 'Semaine 4'],
-    datasets: [
+    labels: labels || ['Semaine 1', 'Semaine 2', 'Semaine 3', 'Semaine 4'],
+    datasets: datasets || [
       {
         label: 'Moyenne Générale',
         data: [12.8, 13.2, 13.6, 13.8],
@@ -37,28 +37,6 @@ export const LineChartComponent = () => {
         borderWidth: 2,
         pointRadius: 4,
         pointBackgroundColor: '#ffffff'
-      },
-      {
-        label: 'Informatique',
-        data: [13.5, 14.1, 14.3, 14.6],
-        borderColor: 'rgba(255, 255, 255, 0.6)',
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-        tension: 0.4,
-        fill: true,
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgba(255, 255, 255, 0.6)'
-      },
-      {
-        label: 'Mathématiques',
-        data: [12.1, 12.5, 13.0, 13.2],
-        borderColor: 'rgba(255, 255, 255, 0.4)',
-        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-        tension: 0.4,
-        fill: true,
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgba(255, 255, 255, 0.4)'
       }
     ]
   };
@@ -87,8 +65,8 @@ export const LineChartComponent = () => {
         min: 11,
         max: 16,
         grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-        ticks: { 
-          color: 'rgba(255, 255, 255, 0.4)', 
+        ticks: {
+          color: 'rgba(255, 255, 255, 0.4)',
           font: { size: 11 },
           callback: (value) => `${value}/20`
         }
@@ -103,11 +81,11 @@ export const LineChartComponent = () => {
   return <Line data={data} options={options} />;
 };
 
-export const DoughnutChartComponent = () => {
+export const DoughnutChartComponent = ({ labels, data: chartData }) => {
   const data = {
-    labels: ['Excellent (≥16)', 'Très Bien (14-16)', 'Bien (12-14)', 'Passable (10-12)', 'Insuffisant (<10)'],
+    labels: labels || ['Excellent (≥16)', 'Très Bien (14-16)', 'Bien (12-14)', 'Passable (10-12)', 'Insuffisant (<10)'],
     datasets: [{
-      data: [15, 28, 35, 17, 5],
+      data: chartData || [15, 28, 35, 17, 5],
       backgroundColor: [
         'rgba(255, 255, 255, 0.8)',
         'rgba(255, 255, 255, 0.6)',

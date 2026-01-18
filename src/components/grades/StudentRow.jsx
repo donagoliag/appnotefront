@@ -1,17 +1,17 @@
-const StudentRow = ({ student, currentSemestre, isRecap, getInitials, getPercentageClass, getGradeClass, getAlertIcon }) => {
+const StudentRow = ({ student, currentSemestre, isRecap, getInitials, getPercentageClass, getGradeClass, getAlertIcon, onEdit, onDelete, onConsult }) => {
   if (!student || !student.semesters) {
     return null;
   }
 
-  const semData = isRecap 
-    ? (student.semesters[1] && student.semesters[2] 
-        ? { 
-            percentage: Math.round((student.semesters[1].percentage + student.semesters[2].percentage) / 2),
-            moyenne: ((student.semesters[1].moyenne + student.semesters[2].moyenne) / 2).toFixed(1)
-          }
-        : null)
+  const semData = isRecap
+    ? (student.semesters[1] && student.semesters[2]
+      ? {
+        percentage: Math.round((student.semesters[1].percentage + student.semesters[2].percentage) / 2),
+        moyenne: ((student.semesters[1].moyenne + student.semesters[2].moyenne) / 2).toFixed(1)
+      }
+      : null)
     : student.semesters[currentSemestre];
-  
+
   if (!semData) return null;
 
   return (
@@ -63,9 +63,9 @@ const StudentRow = ({ student, currentSemestre, isRecap, getInitials, getPercent
           </td>
         </>
       ) : (
-        student.semesters[currentSemestre]?.ues?.map(ue => 
+        student.semesters[currentSemestre]?.ues?.map(ue =>
           ue.ecues.map((ecue, idx) => (
-            <td 
+            <td
               key={`${ue.name}-${idx}`}
               className={`px-4 py-4 border-b border-white/5 text-center font-semibold ${getGradeClass(ecue.note)}`}
             >
@@ -79,15 +79,24 @@ const StudentRow = ({ student, currentSemestre, isRecap, getInitials, getPercent
       {!isRecap && (
         <td className="px-4 py-4 border-b border-white/5 sticky right-0 bg-black/30 backdrop-blur-3xl">
           <div className="flex gap-1.5">
-            <button className="px-3 py-2 rounded-lg border border-white/15 bg-white/5 text-xs font-semibold hover:bg-white/10 transition-all flex items-center gap-1 text-white whitespace-nowrap">
+            <button
+              onClick={() => onConsult(student)}
+              className="px-3 py-2 rounded-lg border border-white/15 bg-white/5 text-xs font-semibold hover:bg-white/10 transition-all flex items-center gap-1 text-white whitespace-nowrap"
+            >
               <i className="fas fa-eye"></i>
               Consulter
             </button>
-            <button className="px-3 py-2 rounded-lg border border-white/15 bg-white/10 text-xs font-semibold hover:bg-white/20 transition-all flex items-center gap-1 text-white whitespace-nowrap">
+            <button
+              onClick={() => onEdit(student)}
+              className="px-3 py-2 rounded-lg border border-white/15 bg-white/10 text-xs font-semibold hover:bg-white/20 transition-all flex items-center gap-1 text-white whitespace-nowrap"
+            >
               <i className="fas fa-edit"></i>
               Modifier
             </button>
-            <button className="px-3 py-2 rounded-lg border border-red-500/20 bg-red-500/10 text-xs font-semibold hover:bg-red-500/20 transition-all flex items-center gap-1 text-red-400 whitespace-nowrap">
+            <button
+              onClick={() => onDelete(student)}
+              className="px-3 py-2 rounded-lg border border-red-500/20 bg-red-500/10 text-xs font-semibold hover:bg-red-500/20 transition-all flex items-center gap-1 text-red-400 whitespace-nowrap"
+            >
               <i className="fas fa-trash"></i>
               Supprimer
             </button>

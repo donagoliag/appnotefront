@@ -2,7 +2,7 @@
 import React from 'react';
 import { Edit2, Trash2, Mail, GraduationCap, UserCircle } from 'lucide-react';
 
-const TeacherCard = ({ teacher }) => {
+const TeacherCard = ({ teacher, onEdit, onDelete }) => {
   return (
     <div className="bg-black/50 backdrop-blur-xl border border-white/15 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:-translate-y-0.5 flex flex-col">
       {/* Header */}
@@ -47,8 +47,8 @@ const TeacherCard = ({ teacher }) => {
           </div>
           <div className="flex flex-wrap gap-1.5">
             {teacher.courses.map((course, idx) => (
-              <span 
-                key={idx} 
+              <span
+                key={idx}
                 className="inline-block px-3 py-1.5 bg-white/10 rounded-lg text-xs font-semibold text-white"
               >
                 {course}
@@ -59,11 +59,17 @@ const TeacherCard = ({ teacher }) => {
 
         {/* Actions - toujours en bas grâce au flex-col parent */}
         <div className="flex gap-2 mt-5">
-          <button className="flex-1 p-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/15 transition-all flex items-center justify-center gap-2 text-white text-[13px] font-semibold">
+          <button
+            onClick={() => onEdit(teacher)}
+            className="flex-1 p-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/15 transition-all flex items-center justify-center gap-2 text-white text-[13px] font-semibold"
+          >
             <Edit2 size={14} />
             <span>Modifier</span>
           </button>
-          <button className="flex-1 p-2.5 rounded-xl border border-red-500/20 bg-red-500/10 text-[#ff6b6b] hover:bg-red-500/20 transition-all flex items-center justify-center gap-2 text-[13px] font-semibold">
+          <button
+            onClick={() => onDelete(teacher.uri)}
+            className="flex-1 p-2.5 rounded-xl border border-red-500/20 bg-red-500/10 text-[#ff6b6b] hover:bg-red-500/20 transition-all flex items-center justify-center gap-2 text-[13px] font-semibold"
+          >
             <Trash2 size={14} />
             <span>Supprimer</span>
           </button>

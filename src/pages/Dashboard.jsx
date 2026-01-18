@@ -1,42 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from '../components/StatCard';
 import ActivityItem from '../components/ActivityItem';
 import StudentRow from '../components/StudentRow';
 import { LineChartComponent, DoughnutChartComponent } from '../components/ChartComponent';
+import { dashboardApi, studentApi, structureApi, noteApi } from '../services/api';
 
 const Dashboard = () => {
   const [activeFilter, setActiveFilter] = useState('30j');
+  const [stats, setStats] = useState([]);
+  const [topStudents, setTopStudents] = useState([]);
+  const [successByFiliere, setSuccessByFiliere] = useState({ labels: [], data: [] });
+  const [gradeTrend, setGradeTrend] = useState({ labels: [], data: [] });
+  const [loading, setLoading] = useState(true);
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  const [newNote, setNewNote] = useState({
+    etudiantUri: '',
+    ecueUri: '',
+    valeurNote: '',
+    session: 'normale',
+    typeEvaluation: 'Examen'
+  });
+  const [students, setStudents] = useState([]);
+  const [ecues, setEcues] = useState([]);
 
-  const statsData = [
-    {
-      label: "Total Étudiants",
-      value: "1,247",
-      subvalue: "Tous niveaux confondus",
-      change: "+15% vs Année dernière",
-      icon: "fas fa-user-graduate"
-    },
-    {
-      label: "Notes Saisies",
-      value: "8,942",
-      subvalue: "Ce trimestre",
-      change: "+24% vs mois dernier",
-      icon: "fas fa-clipboard-check"
-    },
-    {
-      label: "Moyenne Générale",
-      value: "13.8",
-      subvalue: "/ 20 points",
-      change: "+0.7 pts ce mois-ci",
-      icon: "fas fa-chart-line"
-    },
-    {
-      label: "Taux de Réussite",
-      value: "91%",
-      subvalue: "Admis (≥10/20)",
-      change: "+4.5% d'amélioration",
-      icon: "fas fa-graduation-cap"
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, studentsRes, ecuesRes] = await Promise.all([
+          dashboardApi.getStats(),
+          studentApi.getAll(),
+          structureApi.getAllEcues()
+        ]);
+
+        if (statsRes.data.success) {
+          const data = statsRes.data.data;
+          setStats(data.stats);
+          setTopStudents(data.topStudents);
+          setSuccessByFiliere({
+            labels: data.successByFiliere.map(f => f.filiere),
+            data: data.successByFiliere.map(f => f.rate)
+          });
+          setGradeTrend({
+            labels: data.gradeTrend.map(t => t.period),
+            data: data.gradeTrend.map(t => t.average)
+          });
+        }
+
+        if (studentsRes.data.success) setStudents(studentsRes.data.data);
+        if (ecuesRes.data.success) setEcues(ecuesRes.data.data);
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSubmitNote = async (e) => {
+    e.preventDefault();
+    try {
+      await noteApi.create({
+        ...newNote,
+        valeurNote: parseFloat(newNote.valeurNote)
+      });
+      setShowNoteForm(false);
+      setNewNote({ etudiantUri: '', ecueUri: '', valeurNote: '', session: 'normale', typeEvaluation: 'Examen' });
+      // Refresh stats
+      const response = await dashboardApi.getStats();
+      if (response.data.success) {
+        const data = response.data.data;
+        setStats(data.stats);
+      }
+      alert('Note enregistrée avec succès');
+    } catch (error) {
+      alert('Erreur lors de l\'enregistrement de la note');
     }
-  ];
+  };
 
   const activities = [
     {
@@ -61,54 +103,6 @@ const Dashboard = () => {
     }
   ];
 
-  const topStudents = [
-    {
-      initials: "AK",
-      name: "Kouadio Ama",
-      level: "L3 Informatique",
-      matricule: "ETU2024001",
-      filiere: "Informatique",
-      moyenne: "17.8",
-      rang: "1er"
-    },
-    {
-      initials: "YK",
-      name: "Yao Koffi",
-      level: "L2 Commerce",
-      matricule: "ETU2024045",
-      filiere: "Commerce",
-      moyenne: "17.2",
-      rang: "2ème"
-    },
-    {
-      initials: "BA",
-      name: "Bah Aminata",
-      level: "L3 Mathématiques",
-      matricule: "ETU2024012",
-      filiere: "Mathématiques",
-      moyenne: "16.9",
-      rang: "3ème"
-    },
-    {
-      initials: "SO",
-      name: "Soro Oumar",
-      level: "L1 Physique",
-      matricule: "ETU2024089",
-      filiere: "Physique",
-      moyenne: "16.5",
-      rang: "4ème"
-    },
-    {
-      initials: "TF",
-      name: "Traoré Fatoumata",
-      level: "L2 Biologie",
-      matricule: "ETU2024034",
-      filiere: "Biologie",
-      moyenne: "16.1",
-      rang: "5ème"
-    }
-  ];
-
   const filters = ['7j', '30j', 'Trimestre', 'Année'];
 
   return (
@@ -124,18 +118,80 @@ const Dashboard = () => {
             <i className="fas fa-download"></i>
             Exporter
           </button>
-          <button className="bg-white text-black px-5 py-3 rounded-xl flex items-center gap-2 font-semibold hover:bg-gray-100 transition-all duration-300">
-            <i className="fas fa-plus"></i>
-            Nouvelle Note
+          <button
+            onClick={() => setShowNoteForm(!showNoteForm)}
+            className={`${showNoteForm ? 'bg-red-500 text-white' : 'bg-white text-black'} px-5 py-3 rounded-xl flex items-center gap-2 font-semibold hover:bg-opacity-90 transition-all duration-300`}
+          >
+            <i className={`fas fa-${showNoteForm ? 'times' : 'plus'}`}></i>
+            {showNoteForm ? 'Annuler' : 'Nouvelle Note'}
           </button>
         </div>
       </header>
 
+      {showNoteForm && (
+        <div className="bg-black/50 backdrop-blur-md border border-white/15 rounded-3xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+          <h2 className="text-xl font-bold text-white mb-4">Saisir une nouvelle note</h2>
+          <form onSubmit={handleSubmitNote} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Étudiant</label>
+              <select
+                value={newNote.etudiantUri}
+                onChange={(e) => setNewNote({ ...newNote, etudiantUri: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="" className="bg-gray-900">Sélectionner un étudiant</option>
+                {students.map(s => (
+                  <option key={s.uri} value={s.uri} className="bg-gray-900">{s.nom} {s.prenom} ({s.matricule})</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">ECUE</label>
+              <select
+                value={newNote.ecueUri}
+                onChange={(e) => setNewNote({ ...newNote, ecueUri: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                required
+              >
+                <option value="" className="bg-gray-900">Sélectionner une matière</option>
+                {ecues.map(e => (
+                  <option key={e.uri} value={e.uri} className="bg-gray-900">{e.libelleECUE}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">Note (0-20)</label>
+              <input
+                type="number"
+                step="0.25"
+                min="0"
+                max="20"
+                value={newNote.valeurNote}
+                onChange={(e) => setNewNote({ ...newNote, valeurNote: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-white/30"
+                placeholder="15.5"
+                required
+              />
+            </div>
+            <div className="md:col-span-3 flex justify-end">
+              <button type="submit" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-500 transition-all">
+                Enregistrer la Note
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {statsData.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
+        {loading ? (
+          <div className="col-span-4 text-center py-10 text-white">Chargement des statistiques...</div>
+        ) : (
+          stats.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))
+        )}
       </div>
 
       {/* Chart Section */}
@@ -147,11 +203,10 @@ const Dashboard = () => {
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  activeFilter === filter
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/60 hover:text-white'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeFilter === filter
+                  ? 'bg-white/10 text-white'
+                  : 'text-white/60 hover:text-white'
+                  }`}
               >
                 {filter}
               </button>
@@ -159,7 +214,20 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="h-80">
-          <LineChartComponent />
+          <LineChartComponent
+            labels={gradeTrend.labels}
+            datasets={[{
+              label: 'Moyenne Générale',
+              data: gradeTrend.data,
+              borderColor: 'rgba(255, 255, 255, 0.8)',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              tension: 0.4,
+              fill: true,
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: '#ffffff'
+            }]}
+          />
         </div>
       </div>
 
@@ -169,7 +237,10 @@ const Dashboard = () => {
         <div className="bg-black/50 backdrop-blur-md border border-white/15 rounded-3xl shadow-2xl p-6">
           <h2 className="text-xl font-bold text-white mb-6">Distribution des Notes</h2>
           <div className="h-72">
-            <DoughnutChartComponent />
+            <DoughnutChartComponent
+              labels={successByFiliere.labels}
+              data={successByFiliere.data}
+            />
           </div>
         </div>
 
@@ -193,7 +264,7 @@ const Dashboard = () => {
             Voir tout
           </button>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

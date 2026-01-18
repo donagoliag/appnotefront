@@ -1,24 +1,26 @@
 import { useState } from 'react';
 
-const FiltersBar = ({ 
-  currentMaster, 
-  onMasterChange, 
-  currentFiliere, 
+const FiltersBar = ({
+  currentMaster,
+  onMasterChange,
+  currentFiliere,
   onFiliereChange,
   currentSemestre,
   onSemestreChange,
   currentSort,
   onSortChange,
-  onSearch
+  onSearch,
+  filieres = []
 }) => {
   const [showFiliereMenu, setShowFiliereMenu] = useState(false);
   const [showSemestreMenu, setShowSemestreMenu] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
 
-  const filieres = [
-    { value: 'GL', label: 'Génie Logiciel (GL)' },
-    { value: 'SI', label: 'Systèmes d\'Information (SI)' },
-    { value: 'SIRI', label: 'Sécurité Informatique (SIRI)' }
+  const filiereOptions = filieres.length > 0 ? filieres.map(f => ({
+    value: f.code,
+    label: f.libelle
+  })) : [
+    { value: 'M-INFO', label: 'Master Informatique' }
   ];
 
   const getSemestreOptions = () => {
@@ -47,21 +49,19 @@ const FiltersBar = ({
       <div className="flex gap-2 bg-white/5 p-1.5 rounded-xl border border-white/15">
         <button
           onClick={() => onMasterChange(1)}
-          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-            currentMaster === 1
+          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${currentMaster === 1
               ? 'bg-white/10 text-white'
               : 'text-white/80 hover:text-white'
-          }`}
+            }`}
         >
           Master 1
         </button>
         <button
           onClick={() => onMasterChange(2)}
-          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-            currentMaster === 2
+          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${currentMaster === 2
               ? 'bg-white/10 text-white'
               : 'text-white/80 hover:text-white'
-          }`}
+            }`}
         >
           Master 2
         </button>
@@ -83,18 +83,17 @@ const FiltersBar = ({
         </button>
         {showFiliereMenu && (
           <div className="absolute top-full left-0 mt-2 bg-black/40 backdrop-blur-3xl rounded-xl border border-white/15 shadow-2xl p-2 min-w-[200px] z-10">
-            {filieres.map(filiere => (
+            {filiereOptions.map(filiere => (
               <div
                 key={filiere.value}
                 onClick={() => {
                   onFiliereChange(filiere.value);
                   setShowFiliereMenu(false);
                 }}
-                className={`px-4 py-2.5 rounded-lg cursor-pointer text-sm font-semibold transition-all ${
-                  currentFiliere === filiere.value
+                className={`px-4 py-2.5 rounded-lg cursor-pointer text-sm font-semibold transition-all ${currentFiliere === filiere.value
                     ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/8 hover:text-white'
-                }`}
+                  }`}
               >
                 {filiere.label}
               </div>
@@ -115,8 +114,8 @@ const FiltersBar = ({
         >
           <i className="fas fa-calendar-alt"></i>
           <span>
-            {currentSemestre === 'recap' 
-              ? 'Récapitulatif Annuel' 
+            {currentSemestre === 'recap'
+              ? 'Récapitulatif Annuel'
               : `Semestre ${currentSemestre}`}
           </span>
           <i className="fas fa-chevron-down"></i>
@@ -130,11 +129,10 @@ const FiltersBar = ({
                   onSemestreChange(sem.value);
                   setShowSemestreMenu(false);
                 }}
-                className={`px-4 py-2.5 rounded-lg cursor-pointer text-sm font-semibold transition-all ${
-                  currentSemestre === sem.value
+                className={`px-4 py-2.5 rounded-lg cursor-pointer text-sm font-semibold transition-all ${currentSemestre === sem.value
                     ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/8 hover:text-white'
-                }`}
+                  }`}
               >
                 {sem.label}
               </div>
@@ -166,11 +164,10 @@ const FiltersBar = ({
                   onSortChange(sort.value);
                   setShowSortMenu(false);
                 }}
-                className={`px-4 py-2.5 rounded-lg cursor-pointer text-sm font-semibold transition-all ${
-                  currentSort === sort.value
+                className={`px-4 py-2.5 rounded-lg cursor-pointer text-sm font-semibold transition-all ${currentSort === sort.value
                     ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/8 hover:text-white'
-                }`}
+                  }`}
               >
                 {sort.label}
               </div>

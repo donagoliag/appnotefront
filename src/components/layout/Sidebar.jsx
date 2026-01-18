@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
-  const [activeNav, setActiveNav] = useState('home');
 
   const navItems = [
     { id: 'home', path: '/', icon: 'fas fa-home', label: 'Tableau de bord' },
@@ -30,12 +29,10 @@ const Sidebar = () => {
           <NavLink
             key={item.id}
             to={item.path}
-            onClick={() => setActiveNav(item.id)}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                isActive
-                  ? 'bg-white/10 border border-white/20 text-white translate-x-1'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+                ? 'bg-white/10 border border-white/20 text-white translate-x-1'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
               }`
             }
           >
